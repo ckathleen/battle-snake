@@ -10,6 +10,7 @@ const {
 } = require('./handlers.js')
 
 const food = []
+const myPositions = []
 
 // For deployment to Heroku, the port needs to be set using ENV, so
 // we check for the port number in process.env
@@ -37,20 +38,46 @@ app.post('/start', (request, response) => {
   return response.json(data)
 })
 
+function chooseMove (chosenFood, mySnakeHead) {
+  console.log('chosenFood', chosenFood, 'mySnakeHead', mySnakeHead)
+  if (chosenFood.x > mySnakeHead.x) {
+    return {move: 'right'}
+  } else if (chosenFood.x < mySnakeHead.x) {
+    return {move: 'left'}
+  }
+  if (chosenFood.y > mySnakeHead.y) {
+    return {move: 'down'}
+  } else if (chosenFood.y < mySnakeHead.y) {
+    return {move: 'up'}
+  }
+
+  // TO DO: avoid walls 
+
+  // TO DO: avoid collisions
+}
+
+//fn to pick which food to go after
+function chooseFoodToEat (foodPositions) {
+  return foodPositions[0]
+}
+
 // Handle POST request to '/move'
 app.post('/move', (request, response) => {  
-  // get food positions and my position 
-  let food = request.body.board.food
+  
+  let foodPositions = request.body.board.food
   let mySnake = request.body.you
-  console.log(food, mySnake)
+  let mySnakeHead = request.body.you.body[0]
+ 
+  console.log(foodPositions, mySnake)
 
-  // pick move based on food positions and my position
-  let directions = ['up','down','left','right']
-  let chosenMove = directions[Math.floor(Math.random() * directions.length)]
+
+  let chosenFood = chooseFoodToEat(foodPositions)
+  let chosenMove = chooseMove(chosenFood, mySnakeHead) 
+
 
   console.log('move picked: ', chosenMove)
 
-  return response.json({move: chosenMove})
+  return response.json(chosenMove)
 })
 
 
